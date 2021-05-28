@@ -40,15 +40,15 @@ public class UITests {
 
     @BeforeEach
     public void init() {
-        this.host = Optional.ofNullable(System.getProperty("uitest.host"))
+        this.host = Optional.ofNullable(properties.getProperty("uitest.host"))
                 .orElseGet(() -> {
                     log.error("please set env variable uitest.host using localhost:8080");
                     return "http://localhost:8080";
                 });
-        this.recipientMail = Optional.ofNullable(System.getProperty("uitest.mail"))
+        this.recipientMail = Optional.ofNullable(properties.getProperty("uitest.mail"))
                 .orElseGet(() -> {
                     log.error("please set env variable uitest.mail, currently use default email");
-                    return "isicju@gmail.com";
+                    return "ms_jack@inbox.ru";
                 });
     }
 
