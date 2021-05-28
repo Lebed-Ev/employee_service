@@ -33,31 +33,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Log4j2
 public class UITests {
 
-    private String host;
-    private String recipientMail;
-    @Qualifier("appProperties")
-    private Properties properties;
 
-    @BeforeEach
-    public void init() {
-        this.host = Optional.ofNullable(properties.getProperty("uitest.host"))
-                .orElseGet(() -> {
-                    log.error("please set env variable uitest.host using localhost:8080");
-                    return "http://localhost:8080";
-                });
-        this.recipientMail = Optional.ofNullable(properties.getProperty("uitest.mail"))
-                .orElseGet(() -> {
-                    log.error("please set env variable uitest.mail, currently use default email");
-                    return "ms_jack@inbox.ru";
-                });
-    }
 
     @Test
     public void phantomDriver() throws Exception {
         uiTest(new PhantomJSDriver());
     }
 
-//    @Ignore
+    //    @Ignore
 //    @Test
     public void chromeDriver() throws Exception {
         String chromeDriverPath = (new File("src/test/resources").getAbsolutePath() + "\\chromedriver.exe");
@@ -68,8 +51,21 @@ public class UITests {
     private void uiTest(WebDriver driver) throws Exception {
         String[] args1 = new String[0];
         ConfigurableApplicationContext ctx = SpringApplication.run(DemoApplication.class, args1);
+
+        Properties appProperties = (Properties)ctx.getBean("appProperties");
+        String host = Optional.ofNullable(appProperties.getProperty("uitest.host"))
+                .orElseGet(() -> {
+                    log.error("please set env variable uitest.host using localhost:8080");
+                    return "http://localhost:8080";
+                });
+        String recipientMail = Optional.ofNullable(appProperties.getProperty("uitest.mail"))
+                .orElseGet(() -> {
+                    log.error("please set env variable uitest.mail, currently use default email");
+                    return "ms_jack@inbox.ru";
+                });
+
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        driver.get(this.host);
+        driver.get(host);
         Thread.sleep(15000);
         driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
         WebElement secondRecord = driver.findElement(By.xpath("//table/tbody/tr[2]"));
@@ -80,7 +76,7 @@ public class UITests {
         commentsToReport.sendKeys("some details for report");
         WebElement emailAddress = driver.findElement(By.id("exampleInputEmail"));
         emailAddress.click();
-        emailAddress.sendKeys(this.recipientMail);
+        emailAddress.sendKeys(recipientMail);
         Thread.sleep(1000);
         js.executeScript("window.scrollBy(0,250)", "");
         Thread.sleep(1000);
